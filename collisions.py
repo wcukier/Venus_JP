@@ -5,7 +5,7 @@ Methods to caclculate the collision probability of a particle with earth
 """
 
 import numpy as np
-from .constants import *
+from constants import *
 
 def cot_alpha(A, e):
     """
@@ -20,6 +20,7 @@ def cot_alpha(A, e):
     
     Equation Source: Wetherill (1969)
     """
+    if (A < 1): return np.nan
     return np.sqrt((A**2 * e**2 - (A - 1)**2) / (A**2 * (1 - e**2)))
 
 def rel_vel(A, e, i):
@@ -36,6 +37,7 @@ def rel_vel(A, e, i):
     
     Equation Source: Öpik (1951)
     """
+    if (A < 1): return np.nan
     return (np.sqrt(G * MASS_SUN / SEMI_MAJOR_EARTH) * 
             (3 + 1/A - 2 * np.sqrt(A * (1-e) **2) * np.cos(i)))
 
@@ -61,6 +63,7 @@ def prob_per_time(a, e, i):
     U = rel_vel(A, e, i)
     abs_cot_alpha = np.abs(cot_alpha(A, e))
     
+    if (A < 1): return 0
     return (RADIUS_EARTH**2 * U) / (2 * np.pi * np.sin(i) * SEMI_MAJOR_EARTH
                                     * a**2 * np.sqrt(1-e**2) * abs_cot_alpha)
     
