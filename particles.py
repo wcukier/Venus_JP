@@ -93,7 +93,7 @@ def initial_state(n, v_inf, planets = ["2", "3", "5"]):
     points = uniform_sphere(n)
     states[len(planets):,:] = np.hstack((points * 300 * RADIUS_VENUS, 
                                         points * v_inf))
-    states[len(planets):,:] += pos
+    states[len(planets):,:] += venus
     
     
     return states
