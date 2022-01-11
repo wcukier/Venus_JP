@@ -68,7 +68,7 @@ def initial_state(n, v_inf, planets = ["2", "3", "5"]):
     v_inf relative to Venus.  By default uses Venus, Earth, and Jupiter. 
     Alternative sets of planets can be specified by passing a list of SPICE IDs
     to planets.  Planets arragement is determined by picking a random time 
-    between Jan-1-1550 and Jan-1-2650.  All vectors are in ECLIP_J2000
+    between Jan-1-1850 and Jan-1-2150.  All vectors are in ECLIP_J2000
     
     Units
     n:                dimentionless
@@ -79,7 +79,7 @@ def initial_state(n, v_inf, planets = ["2", "3", "5"]):
     return[:,3:]:     m/s
     """
     
-    time = random_time(1550, 2650)
+    time = random_time(1850, 2150)
     states = np.zeros((n+len(planets), 6))
     
     venus = []

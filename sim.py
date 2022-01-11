@@ -12,7 +12,7 @@ import sys
 
 
 N_ACTIVE = 4
-YEAR_STEP = 1
+YEAR_STEP = 5000
 
 
 def initialize(max_years, n):
@@ -141,11 +141,15 @@ def log(sim, logger, n, year):
 
     return
 
-def write_log (log, v_inf, run_num):
+def write_log (logger, v_inf, run_num):
     """
-    TODO
+    Writes the data contained in logger to a .npy file on disk.  File name is
+    f"V_inf-{v_inf}-Run-{run_num}".
+    
+    Units are irrelevant
+    returns void
     """
-    np.save(f"V_inf-{v_inf}-Run-{run_num}", log)
+    np.save(f"V_inf-{v_inf}-Run-{run_num}", logger)
     return
     
     

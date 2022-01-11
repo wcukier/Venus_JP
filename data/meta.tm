@@ -19,6 +19,6 @@ KPL/MK
    PATH_SYMBOLS = ( 'PTH')
    
    KERNELS_TO_LOAD = ( '$PTH/naif0012.tls',
-                       '$PTH/de440.bsp',
+                       '$PTH/de440s.bsp',
 )
    \begintext
