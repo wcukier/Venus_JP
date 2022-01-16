@@ -33,7 +33,7 @@ def initialize(max_years, n):
     sim.testparticle_type = 0
     
     
-    return sim, np.zeros((max_years/YEAR_STEP+1,n,4))
+    return sim, np.zeros((int(max_years/YEAR_STEP)+1,n,4))
     
 
 def add_particles(sim, n, v_inf):
