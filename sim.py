@@ -149,7 +149,7 @@ def write_log (logger, v_inf, run_num):
     Units are irrelevant
     returns void
     """
-    np.save(f"output/v{int(v/1000)}-r{run_num}", logger)
+    np.save(f"output/v{int(v_inf/1000)}-r{run_num}", logger)
     return
     
     
