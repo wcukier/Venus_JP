@@ -12,7 +12,7 @@ import sys
 
 
 N_ACTIVE = 4
-YEAR_STEP = 5000
+YEAR_STEP = 1
 
 
 def initialize(max_years, n):
@@ -27,11 +27,11 @@ def initialize(max_years, n):
     sim.units = ("s", "m", "kg")
     sim.integrator = "mercurius"
     sim.ri_whfast.safe_mode = 0
-    sim.ri_whfast.corrector = 11
+#    sim.ri_whfast.corrector = 11
     sim.dt = 1e4
     sim.ri_ias15.min_dt = 1e-4 * sim.dt
     sim.testparticle_type = 0
-    
+    print("Simulation Initialized")
     
     return sim, np.zeros((int(max_years/YEAR_STEP)+1,n,4))
     
@@ -56,7 +56,7 @@ def add_particles(sim, n, v_inf):
             vx = states[0,3], vy = states[0,4], vz = states[0,5])
     sim.add(m = MASS_EARTH, x = states[1,0], y = states[1,1], z = states[1,2], 
             vx = states[1,3], vy = states[1,4], vz = states[1,5])
-    sim.add(m = MASS_VENUS, x = states[2,0], y = states[2,1], z = states[2,2], 
+    sim.add(m = MASS_JUPITER, x = states[2,0], y = states[2,1], z = states[2,2], 
             vx = states[2,3], vy = states[2,4], vz = states[2,5])
     
     for i in range(3, n+3):
@@ -66,6 +66,8 @@ def add_particles(sim, n, v_inf):
         
     sim.move_to_com()
     sim.n_active = 4
+
+    print(f"Sun, Venus, Earth, Jupiter, and {n} particles have been added.")
     
     return
     
@@ -184,6 +186,7 @@ def simulate(n, max_years, v_inf, run_num):
     return
 
 if (__name__ == "__main__"):
+    print("This should show up right away")
     simulate(int(sys.argv[1]), int(sys.argv[2]), float(sys.argv[3]), 
              int(sys.argv[4]))
     
