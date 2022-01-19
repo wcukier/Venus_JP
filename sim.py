@@ -31,7 +31,7 @@ def initialize(max_years, n):
     sim.dt = 1e4
     sim.ri_ias15.min_dt = 1e-4 * sim.dt
     sim.testparticle_type = 0
-    print("Simulation Initialized")
+    print("Simulation Initialized", flush=True)
     
     return sim, np.zeros((int(max_years/YEAR_STEP)+1,n,4))
     
@@ -67,7 +67,8 @@ def add_particles(sim, n, v_inf):
     sim.move_to_com()
     sim.n_active = 4
 
-    print(f"Sun, Venus, Earth, Jupiter, and {n} particles have been added.")
+    print(f"Sun, Venus, Earth, Jupiter, and {n} particles have been added.",
+         flush = True)
     
     return
     
@@ -81,7 +82,7 @@ def step(sim, year):
     return:     void
     """
     sim.integrate(year * SEC_PER_YEAR, exact_finish_time = 0)
-    print(f"=====Year {year}=====")
+    print(f"=====Year {year}=====", flush = True)
     return
 
     
@@ -104,14 +105,14 @@ def remove_particles(sim, n_removed):
             sim.remove(hash = h)
             n_removed += 1
             print(f"Removed sun-grazing particle. \
-                  {n_removed} particles removed")
+                  {n_removed} particles removed", flush = True)
             sim.ri_whfast.recalculate_coordinates_this_timestep = 1
             
         elif d > 10*AU:
             sim.remove(hash = h)
             n_removed += 1
             print(f"Removed escaping particle. \
-                  {n_removed} particles removed")
+                  {n_removed} particles removed", flush = True)
             sim.ri_whfast.recalculate_coordinates_this_timestep = 1
             
     return n_removed
@@ -186,7 +187,6 @@ def simulate(n, max_years, v_inf, run_num):
     return
 
 if (__name__ == "__main__"):
-    print("This should show up right away")
     simulate(int(sys.argv[1]), int(sys.argv[2]), float(sys.argv[3]), 
              int(sys.argv[4]))
     
