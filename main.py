@@ -14,6 +14,7 @@ import numpy as np
 
 if __name__ == "__main__":
     num_cores = int(os.getenv('SLURM_CPUS_PER_TASK'))
+    PARTICLES_PER_RUN = 10
     
     
     n = int(sys.argv[1])
@@ -24,18 +25,18 @@ if __name__ == "__main__":
     
     param_array = []
     start = 0
-    end = 10
+    end = PARTICLES_PER_RUN
     states = initial_state(n, v_inf, planets = ["2", "3", "5"])
     while(end < n):
         param_array.append([n, max_years, v_inf, start, end, states])
-        start += 10
-        end += 10
+        start += PARTICLES_PER_RUN
+        end += PARTICLES_PER_RUN
         
     if(start < n):
         param_array.append([n, max_years, v_inf, start, n, states])
         
     with Pool(num_cores) as pool:
-        res = pool.starmap(simulate, param_array)
+        res = pool.starmap(sim_set_states, param_array)
     
     write_log(np.array(res), v_inf, run_num)
 
