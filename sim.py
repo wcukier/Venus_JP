@@ -36,17 +36,23 @@ def initialize(max_years, n):
     return sim, np.zeros((int(max_years/YEAR_STEP)+1,n,4))
     
 
-def add_particles(sim, n, v_inf):
+def add_particles(sim, n, v_inf, start = 0, end = -1):
     """
     Add the n particles, along with the Sun, Venus, Earth, and Jupiter, to the
-    simulation.  The particles are added after the major solar system bodies
+    simulation.  The particles are added after the major solar system bodies.
+    If start and end are specified, only particles with array bounds between 
+    start and end are actually added.
     
     Units
     sim:           (Rebound Simulation)
     n:             dimentionless
     v_inf:         m/s
+    start:         dimentionless
+    end:           dimentionless
     return:        void
     """
+    if (end < 0): end = n
+    
     states = initial_state(n, v_inf, planets = ["2", "3", "5"])
     
     sim.add(m = MASS_SUN)
@@ -59,7 +65,7 @@ def add_particles(sim, n, v_inf):
     sim.add(m = MASS_JUPITER, x = states[2,0], y = states[2,1], z = states[2,2], 
             vx = states[2,3], vy = states[2,4], vz = states[2,5])
     
-    for i in range(3, n+3):
+    for i in range(3 + start, end+3):
         sim.add(x = states[i,0], y = states[i,1], z = states[i,2],
                 vx = states[i,3], vy = states[i,4], vz = states[i,5],
                 hash = f"{i-3}")
@@ -156,23 +162,26 @@ def write_log (logger, v_inf, run_num):
     return
     
     
-def simulate(n, max_years, v_inf, run_num):
+def simulate(n, max_years, v_inf, start=0, end=-1):
     """
     Simulates n particles launched 300 Venus radii from Venus at a velocity of
-    v_inf for max_years amount of time.  Logs the semi-major axis, eccentricity,
-    inclination, and chance of hitting earth for each particle in 
-    f"{v_inf}_{run_num}.npy".
+    v_inf for max_years amount of time.  Returns a log of the semi-major axis, 
+    eccentricity,inclination, and chance of hitting earth for each particle as a
+    numpy array. If start and end are specified, only particles with array 
+    bounds between start and end are actually added.
     
     Units
     n:           dimentionless
     max_years:   years
     v_inf:       m/s
-    run_num:     dimentionless
-    return:      void
+    start:       dimentionless
+    end:         dimentionless
+    return:      m, dimentionless, degrees, dimentionless (max_years+1, n, 4)
     """
+    if (end < 0): end = n
     
     sim, logger = initialize(max_years, n)
-    add_particles(sim, n, v_inf)
+    add_particles(sim, n, v_inf, start=start, end=end)
     
     year = 0
     n_removed = 0
@@ -181,14 +190,12 @@ def simulate(n, max_years, v_inf, run_num):
         n_removed += remove_particles(sim, n_removed)
         log(sim, logger, n, year)
         year += YEAR_STEP
-    
-    
-    write_log(logger, v_inf, run_num)
-    return
+        
+    return logger
 
 if (__name__ == "__main__"):
-    simulate(int(sys.argv[1]), int(sys.argv[2]), float(sys.argv[3]), 
-             int(sys.argv[4]))
+    logger = simulate(int(sys.argv[1]), int(sys.argv[2]), float(sys.argv[3]))
+    write_log(logger, float(sys.argv[3]), int(sys.argv[4]))
     
     
     

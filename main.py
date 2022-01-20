@@ -1,0 +1,40 @@
+"""
+main.py
+author: Wolf Cukier
+Simulates the timescale for meteor ejecta traveling from Venus to Earth. 
+Multithreaded program, designed specifically to be run using slurm
+"""
+
+from sim import simulate, write_log
+from multiprocessing import Pool
+import os
+import numpy
+
+if __name__ == "__main__":
+    num_cores = int(os.getenv('SLURM_CPUS_PER_TASK'))
+    
+    
+    n = int(sys.argv[1])
+    max_years = int(sys.argv[2])
+    v_inf = float(sys.argv[3])
+    run_num = int(sys.argv[4])
+    
+    
+    param_array = []
+    start = 0
+    end = 10
+    
+    while(end < n):
+        param_array.append([n, max_years, v_inf, start=start, end=end])
+        start += 10
+        end += 10
+        
+    if(start < n):
+        param_array.append([n, max_years, v_inf, start=start, end=n])
+        
+    with Pool(num_cores) as pool:
+        res = pool.starmap(simulate, param_array)
+    
+    write_log(np.array(res), v_inf, run_num)
+
+    
