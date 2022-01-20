@@ -10,7 +10,7 @@ from multiprocessing import Pool
 from particles import initial_state
 import os
 import sys
-import numpy
+import numpy as np
 
 if __name__ == "__main__":
     num_cores = int(os.getenv('SLURM_CPUS_PER_TASK'))
