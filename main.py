@@ -8,6 +8,7 @@ Multithreaded program, designed specifically to be run using slurm
 from sim import simulate, write_log
 from multiprocessing import Pool
 import os
+import sys
 import numpy
 
 if __name__ == "__main__":
