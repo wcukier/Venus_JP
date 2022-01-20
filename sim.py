@@ -181,7 +181,7 @@ def simulate(n, max_years, v_inf, start, end, states):
     if (end < 0): end = n
     
     sim, logger = initialize(max_years, n)
-    add_particles(sim, n, v_inf, start=start, end=end)
+    add_particles(sim, n, v_inf, start=start, end=end, states=states)
     
     year = 0
     n_removed = 0
