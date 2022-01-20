@@ -36,7 +36,7 @@ def initialize(max_years, n):
     return sim, np.zeros((int(max_years/YEAR_STEP)+1,n,4))
     
 
-def add_particles(sim, n, v_inf, start = 0, end = -1):
+def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
     """
     Add the n particles, along with the Sun, Venus, Earth, and Jupiter, to the
     simulation.  The particles are added after the major solar system bodies.
@@ -53,7 +53,7 @@ def add_particles(sim, n, v_inf, start = 0, end = -1):
     """
     if (end < 0): end = n
     
-    states = initial_state(n, v_inf, planets = ["2", "3", "5"])
+    if states = -1, states = initial_state(n, v_inf, planets = ["2", "3", "5"])
     
     sim.add(m = MASS_SUN)
     sim.move_to_hel()
@@ -123,7 +123,7 @@ def remove_particles(sim, n_removed):
             
     return n_removed
         
-def log(sim, logger, n, year):
+def log(sim, logger, n, year, start, end):
     """
     Stores the semi-major axis, eccentricity, and inclination for each of n
     massless particles in sim into log, in the corresponding location based on
@@ -162,7 +162,7 @@ def write_log (logger, v_inf, run_num):
     return
     
     
-def simulate(n, max_years, v_inf, start, end):
+def simulate(n, max_years, v_inf, start, end, states):
     """
     Simulates n particles launched 300 Venus radii from Venus at a velocity of
     v_inf for max_years amount of time.  Returns a log of the semi-major axis, 
@@ -188,7 +188,7 @@ def simulate(n, max_years, v_inf, start, end):
     while(year <= max_years):
         step(sim, year)
         n_removed += remove_particles(sim, n_removed)
-        log(sim, logger, n, year)
+        log(sim, logger, n, year, start, end)
         year += YEAR_STEP
         
     return logger
