@@ -53,7 +53,7 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
     """
     if (end < 0): end = n
     
-    if (states == -1): states = initial_state(n, v_inf, planets = ["2", "3", "5"])
+    # if (states == -1): states = initial_state(n, v_inf, planets = ["2", "3", "5"])
     
     sim.add(m = MASS_SUN)
     sim.move_to_hel()
