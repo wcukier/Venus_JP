@@ -5,7 +5,7 @@ Simulates the timescale for meteor ejecta traveling from Venus to Earth.
 Multithreaded program, designed specifically to be run using slurm
 """
 
-from sim import simulate, write_log
+from sim import sim_set_states, write_log
 from multiprocessing import Pool
 from particles import initial_state
 import os

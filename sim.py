@@ -188,7 +188,7 @@ def simulate(n, max_years, v_inf):
     while(year <= max_years):
         step(sim, year)
         n_removed += remove_particles(sim, n_removed)
-        log(sim, logger, n, year, start, end)
+        log(sim, logger, n, year)
         year += YEAR_STEP
         
     return logger
@@ -220,7 +220,7 @@ def sim_set_states(n, max_years, v_inf, start, end, states):
     while(year <= max_years):
         step(sim, year)
         n_removed += remove_particles(sim, n_removed)
-        log(sim, logger, end-start, year, start, end)
+        log(sim, logger, end-start, year)
         year += YEAR_STEP
         
     return logger
