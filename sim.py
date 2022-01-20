@@ -162,7 +162,7 @@ def write_log (logger, v_inf, run_num):
     return
     
     
-def simulate(n, max_years, v_inf, start=0, end=-1):
+def simulate(n, max_years, v_inf, start, end):
     """
     Simulates n particles launched 300 Venus radii from Venus at a velocity of
     v_inf for max_years amount of time.  Returns a log of the semi-major axis, 
