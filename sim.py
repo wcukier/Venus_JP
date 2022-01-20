@@ -12,7 +12,7 @@ import sys
 
 
 N_ACTIVE = 4
-YEAR_STEP = 1
+YEAR_STEP = 5000
 
 
 def initialize(max_years, n):
