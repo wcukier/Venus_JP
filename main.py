@@ -25,12 +25,12 @@ if __name__ == "__main__":
     end = 10
     
     while(end < n):
-        param_array.append([n, max_years, v_inf, start=start, end=end])
+        param_array.append([n, max_years, v_inf, start, end])
         start += 10
         end += 10
         
     if(start < n):
-        param_array.append([n, max_years, v_inf, start=start, end=n])
+        param_array.append([n, max_years, v_inf, start, n])
         
     with Pool(num_cores) as pool:
         res = pool.starmap(simulate, param_array)
