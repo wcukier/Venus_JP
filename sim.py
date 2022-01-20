@@ -68,7 +68,7 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
     for i in range(3 + start, end+3):
         sim.add(x = states[i,0], y = states[i,1], z = states[i,2],
                 vx = states[i,3], vy = states[i,4], vz = states[i,5],
-                hash = f"{i-3}")
+                hash = f"{i-3-start}")
         
     sim.move_to_com()
     sim.n_active = 4
@@ -123,7 +123,7 @@ def remove_particles(sim, n_removed):
             
     return n_removed
         
-def log(sim, logger, n, year, start, end):
+def log(sim, logger, n, year):
     """
     Stores the semi-major axis, eccentricity, and inclination for each of n
     massless particles in sim into log, in the corresponding location based on
@@ -162,7 +162,7 @@ def write_log (logger, v_inf, run_num):
     return
     
     
-def simulate(n, max_years, v_inf, start, end, states):
+def simulate(n, max_years, v_inf):
     """
     Simulates n particles launched 300 Venus radii from Venus at a velocity of
     v_inf for max_years amount of time.  Returns a log of the semi-major axis, 
@@ -181,7 +181,7 @@ def simulate(n, max_years, v_inf, start, end, states):
     if (end < 0): end = n
     
     sim, logger = initialize(max_years, n)
-    add_particles(sim, n, v_inf, start=start, end=end, states=states)
+    add_particles(sim, n, v_inf)
     
     year = 0
     n_removed = 0
@@ -192,6 +192,39 @@ def simulate(n, max_years, v_inf, start, end, states):
         year += YEAR_STEP
         
     return logger
+
+
+def sim_set_states(n, max_years, v_inf, start, end, states):
+    """
+    Simulates n particles launched 300 Venus radii from Venus at a velocity of
+    v_inf for max_years amount of time.  Returns a log of the semi-major axis, 
+    eccentricity,inclination, and chance of hitting earth for each particle as a
+    numpy array. If start and end are specified, only particles with array 
+    bounds between start and end are actually added.
+    
+    Units
+    n:           dimentionless
+    max_years:   years
+    v_inf:       m/s
+    start:       dimentionless
+    end:         dimentionless
+    return:      m, dimentionless, degrees, dimentionless (max_years+1, n, 4)
+    """
+    if (end < 0): end = n
+    
+    sim, logger = initialize(max_years, end-start)
+    add_particles(sim, n, v_inf, start=start, end=end, states=states)
+    
+    year = 0
+    n_removed = 0
+    while(year <= max_years):
+        step(sim, year)
+        n_removed += remove_particles(sim, n_removed)
+        log(sim, logger, end-start, year, start, end)
+        year += YEAR_STEP
+        
+    return logger
+
 
 if (__name__ == "__main__"):
     logger = simulate(int(sys.argv[1]), int(sys.argv[2]), float(sys.argv[3]))
