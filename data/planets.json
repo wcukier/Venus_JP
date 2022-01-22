@@ -1,0 +1,57 @@
+{
+    "__file_info__": {
+        "name": "planets.json",
+        "author":"Wolf Cukier",
+        "units": "kg, m, s units",
+        "source": "Wikipedia, accessed 24 Jan 2022"
+    },
+
+    "1": {
+        "name": "Mercury",
+        "mass": 3.30104e23,
+        "radius": 2.4397e6,
+        "semi_major": 5.790905e10
+    },
+    "2": {
+        "name": "Venus",
+        "mass": 4.8675e24,
+        "radius": 6.0518e6,
+        "semi_major": 1.08208e11
+    },
+    "3": {
+        "name": "Earth",
+        "mass": 5.97237e24,
+        "radius": 6.371e6,
+        "semi_major": 1.49598023e11
+    },
+    "4": {
+        "name": "Mars",
+        "mass": 6.4171e23,
+        "radius": 2.4397e6,
+        "semi_major": 2.279392e11
+    },
+    "5": {
+        "name": "Jupiter",
+        "mass": 1.8982e27,
+        "radius": 6.9911e7,
+        "semi_major": 7.7857e11
+    },
+    "6": {
+        "name": "Saturn",
+        "mass": 5.6834e26,
+        "radius": 5.8232e7,
+        "semi_major": 1.43353e12
+    },
+    "7": {
+        "name": "Uranus",
+        "mass": 8.6810e25,
+        "radius": 2.5362e7,
+        "semi_major": 2.870972e12
+    },
+    "8": {
+        "name": "Neptune",
+        "mass": 1.024e26,
+        "radius": 2.4622e7,
+        "semi_major": 4.46e12
+    }
+}

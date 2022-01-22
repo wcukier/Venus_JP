@@ -1,0 +1,9 @@
+{
+"source": "4",
+"planets": ["3", "4", "5"],
+"YEAR_STEP": 5000,
+"PARTICLES_PER_RUN": 10,
+"v_inf": 1000,
+"max_years":1000000,
+"n": 300
+}

@@ -10,24 +10,25 @@ from constants import *
 def cot_alpha(A, e):
     """
     Takes the scaled semimajor axis, A, and eccentricity, e, of the particle
-    and returns the angle between the trajectory of the particle and the 
+    and returns the angle between the trajectory of the particle and the
     radius vector from the Sun.
     
     Units and Type
-    A:         dimentionless         
+    A:         dimentionless
     e:         dimentionless
     return:    dimentionless
     
     Equation Source: Wetherill (1969)
     """
     if (A < 1): return np.nan
+    
     return np.sqrt((A**2 * e**2 - (A - 1)**2) / (A**2 * (1 - e**2)))
 
 def rel_vel(A, e, i):
     """
-    Takes the scaled semimajor axis, A, eccentricity, e, and orbital 
-    inclination, i, of a particle and returns the relative velocity between the 
-    particle and Earth at the point of collision. 
+    Takes the scaled semimajor axis, A, eccentricity, e, and orbital
+    inclination, i, of a particle and returns the relative velocity between the
+    particle and Earth at the point of collision.
     
     Units
     A:        dimentionless

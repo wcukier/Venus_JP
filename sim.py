@@ -9,16 +9,22 @@ from collisions import collision_probability
 import rebound
 import numpy as np
 import sys
+import json
 
-
-N_ACTIVE = 4
-YEAR_STEP = 5000
+with open("data/planets.json") as f:
+    planets = json.load(f)
+with open("config.json") as f:
+    config = json.load(f)
+    
+N_ACTIVE = len(config["planets"]) + 1
+YEAR_STEP = config["YEAR_STEP"]
 
 
 def initialize(max_years, n):
     """
     Initialize the rebound simulation which will later be run for max_years.
-    Returns the simulation and an array to log the output in
+    Returns the simulation and an array to log the output in.  Prints success to
+    stderr.
     
     Units
     return:        (Rebound Simulation), dimentionless (max_years+1, n, 4)
@@ -31,7 +37,7 @@ def initialize(max_years, n):
     sim.dt = 1e4
     sim.ri_ias15.min_dt = 1e-4 * sim.dt
     sim.testparticle_type = 0
-    print("Simulation Initialized", flush=True)
+    print("Simulation Initialized", flush=True, file = sys.stderr)
     
     return sim, np.zeros((int(max_years/YEAR_STEP)+1,n,4))
     
@@ -41,7 +47,9 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
     Add the n particles, along with the Sun, Venus, Earth, and Jupiter, to the
     simulation.  The particles are added after the major solar system bodies.
     If start and end are specified, only particles with array bounds between 
-    start and end are actually added.
+    start and end are actually added.  If states are not provided adds particles
+    with a velocity of v_inf, otherwise uses the provided states. Prints sucess
+    to stderr.
     
     Units
     sim:           (Rebound Simulation)
@@ -53,17 +61,17 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
     """
     if (end < 0): end = n
     
-    # if (states == -1): states = initial_state(n, v_inf, planets = ["2", "3", "5"])
-    
+    if (np.all(states == -1)): 
+        states = initial_state(n, v_inf, planets = config["planets"], 
+                               source_id=config["source"])
+
     sim.add(m = MASS_SUN)
     sim.move_to_hel()
     
-    sim.add(m = MASS_VENUS, x = states[0,0], y = states[0,1], z = states[0,2], 
-            vx = states[0,3], vy = states[0,4], vz = states[0,5])
-    sim.add(m = MASS_EARTH, x = states[1,0], y = states[1,1], z = states[1,2], 
-            vx = states[1,3], vy = states[1,4], vz = states[1,5])
-    sim.add(m = MASS_JUPITER, x = states[2,0], y = states[2,1], z = states[2,2], 
-            vx = states[2,3], vy = states[2,4], vz = states[2,5])
+    for i , p in enumerate(config["planets"]):
+        sim.add(m = planets[p]["mass"], 
+                x = states[i,0], y = states[i,1], z = states[i,2],
+                vx = states[i,3], vy = states[i,4], vz = states[i,5])
     
     for i in range(3 + start, end+3):
         sim.add(x = states[i,0], y = states[i,1], z = states[i,2],
@@ -71,16 +79,17 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
                 hash = f"{i-3-start}")
         
     sim.move_to_com()
-    sim.n_active = 4
+    sim.n_active = N_ACTIVE
 
-    print(f"Sun, Venus, Earth, Jupiter, and {n} particles have been added.",
-         flush = True)
+    print(f"Planets and and {n} particles have been added.",
+         flush = True, file=sys.stderr)
     
     return
     
 def step(sim, year):
     """
-    Advances the simulation forward to year years after simulation start
+    Advances the simulation sim forward to year years after simulation start. 
+    Prints the current execution year to stderr.
     
     Units
     sim:        (Rebound Simulation)
@@ -88,18 +97,20 @@ def step(sim, year):
     return:     void
     """
     sim.integrate(year * SEC_PER_YEAR, exact_finish_time = 0)
-    print(f"=====Year {year}=====", flush = True)
+    print(f"=====Year {year}=====", flush = True, file = sys.stderr)
     return
 
     
 def remove_particles(sim, n_removed):
     """
     Removes all particles that are either sun-grazing (<.01 au) or escaping the
-    system (>10 au).
+    system (>10 au).  Prints the number of removed particles, n_removed, to 
+    stderr
     
     Units
     sim:        (Rebound Simulation)
     n_removed:  dimentionless
+    return:     dimentionless
     """
     
     sim.integrator_synchronize()
@@ -111,14 +122,16 @@ def remove_particles(sim, n_removed):
             sim.remove(hash = h)
             n_removed += 1
             print(f"Removed sun-grazing particle. \
-                  {n_removed} particles removed", flush = True)
+                  {n_removed} particles removed", flush = True, 
+                  file = sys.stderr)
             sim.ri_whfast.recalculate_coordinates_this_timestep = 1
             
         elif d > 10*AU:
             sim.remove(hash = h)
             n_removed += 1
             print(f"Removed escaping particle. \
-                  {n_removed} particles removed", flush = True)
+                  {n_removed} particles removed", flush = True,
+                  file = sys.stderr)
             sim.ri_whfast.recalculate_coordinates_this_timestep = 1
             
     return n_removed
@@ -164,11 +177,11 @@ def write_log (logger, v_inf, run_num):
     
 def simulate(n, max_years, v_inf):
     """
-    Simulates n particles launched 300 Venus radii from Venus at a velocity of
-    v_inf for max_years amount of time.  Returns a log of the semi-major axis, 
-    eccentricity,inclination, and chance of hitting earth for each particle as a
-    numpy array. If start and end are specified, only particles with array 
-    bounds between start and end are actually added.
+    Simulates n particles launched 300 planet radii from the source planet at a 
+    velocity of v_inf for max_years amount of time.  Returns a log of the 
+    semi-major axis, eccentricity, inclination, and probability of hitting earth
+    for each particle as a numpy array. If start and end are specified, only 
+    particles with array bounds between start and end are actually added.
     
     Units
     n:           dimentionless
@@ -178,7 +191,6 @@ def simulate(n, max_years, v_inf):
     end:         dimentionless
     return:      m, dimentionless, degrees, dimentionless (max_years+1, n, 4)
     """
-    if (end < 0): end = n
     
     sim, logger = initialize(max_years, n)
     add_particles(sim, n, v_inf)
@@ -196,11 +208,13 @@ def simulate(n, max_years, v_inf):
 
 def sim_set_states(n, max_years, v_inf, start, end, states):
     """
-    Simulates n particles launched 300 Venus radii from Venus at a velocity of
-    v_inf for max_years amount of time.  Returns a log of the semi-major axis, 
-    eccentricity,inclination, and chance of hitting earth for each particle as a
-    numpy array. If start and end are specified, only particles with array 
-    bounds between start and end are actually added.
+    Simulates n particles launched 300 planet radii from the source planet at a 
+    velocity of v_inf for max_years amount of time.  Returns a log of the 
+    semi-major axis, eccentricity, inclination, and probability of hitting earth
+    for each particle as a numpy array. If start and end are specified, only 
+    particles with array bounds between start and end are actually added.
+    Simulation uses the states provided but only the start-th to end-th 
+    non-active particles
     
     Units
     n:           dimentionless
@@ -208,6 +222,7 @@ def sim_set_states(n, max_years, v_inf, start, end, states):
     v_inf:       m/s
     start:       dimentionless
     end:         dimentionless
+    states:      [:, 0:3] m, [:, 3:] m/s
     return:      m, dimentionless, degrees, dimentionless (max_years+1, n, 4)
     """
     if (end < 0): end = n
