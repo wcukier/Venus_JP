@@ -156,7 +156,8 @@ def log(sim, logger, n, year):
         try:
             p = sim.particles[f"{h}"]
             o = p.calculate_orbit(primary = sim.particles[0])
-            prob = collision_probability(o.a, o.e, o.inc, YEAR_STEP)
+            prob = collision_probability(o.a, o.e, o.inc, 
+                                         YEAR_STEP*SEC_PER_YEAR)
             logger[step, h, :] = [o.a, o.e, o.inc, prob]
         except:
             logger[step, h, :] = [np.nan, np.nan, np.nan, np.nan]
