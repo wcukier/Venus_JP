@@ -19,6 +19,7 @@ if __name__ == "__main__":
     num_cores = int(os.getenv('SLURM_CPUS_PER_TASK'))
     PARTICLES_PER_RUN = config["PARTICLES_PER_RUN"]
     planets = config["planets"]
+    source = config["source"]
 
     n = config["n"]
     max_years = config["max_years"]
@@ -32,7 +33,7 @@ if __name__ == "__main__":
     param_array = []
     start = 0
     end = PARTICLES_PER_RUN
-    states = initial_state(n, v_inf, planets = planets)
+    states = initial_state(n, v_inf, planets = planets, source_id=source)
     while(end < n):
         param_array.append([n, max_years, v_inf, start, end, states])
         start += PARTICLES_PER_RUN
