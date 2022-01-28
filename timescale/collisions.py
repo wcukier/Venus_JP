@@ -5,7 +5,9 @@ Methods to caclculate the collision probability of a particle with earth
 """
 
 import numpy as np
-from constants import *
+from timescale.constants import *
+import json
+
 
 def cot_alpha(A, e):
     """
@@ -20,15 +22,18 @@ def cot_alpha(A, e):
     
     Equation Source: Wetherill (1969)
     """
-    if (A < 1): return np.nan
+    if (A < 1): return 0
+   
+    result = np.sqrt((A**2 * e**2 - (A - 1)**2) / (A**2 * (1 - e**2)))
+    if (np.isnan(result)): result = 0
     
-    return np.sqrt((A**2 * e**2 - (A - 1)**2) / (A**2 * (1 - e**2)))
+    return result
 
-def rel_vel(A, e, i):
+def rel_vel(A, e, i, target):
     """
     Takes the scaled semimajor axis, A, eccentricity, e, and orbital
     inclination, i, of a particle and returns the relative velocity between the
-    particle and Earth at the point of collision.
+    particle and the target at the point of collision.
     
     Units
     A:        dimentionless
@@ -38,38 +43,47 @@ def rel_vel(A, e, i):
     
     Equation Source: Öpik (1951)
     """
+
     if (A < 1): return np.nan
-    return (np.sqrt(G * MASS_SUN / SEMI_MAJOR_EARTH) * 
+    return (np.sqrt(G * MASS_SUN / target["semi_major"]) *
             (3 + 1/A - 2 * np.sqrt(A * (1-e) **2) * np.cos(i)))
 
 
-def prob_per_time(a, e, i):
+
+
+
+def prob_per_time(a, e, i, target):
     """
     Takes the semi-major axis, a, eccentricity, e, and orbital inclination, i, 
     of a particle and returns the probability per unit time that the particle
-    will collide with earth.  This measurement is only valid over long time 
-    scales.  This assumes that the radius of Earth is much larger than the 
-    particle radius.
+    will collide with the target specified in config.  This measurement is only
+    valid over long time scales.  This assumes that the radius of the target is
+    much larger than the particle radius and that the target has eccentricity
+    and orbital inclination of 0.
     
     Units
     a:         m
     e:         dimentionless
     i:         degrees
+    target:    dictionary
     return:    s^-1
     
     Equation Source: Wetherill (1969)
     """
     
-    A = a/SEMI_MAJOR_EARTH
-    U = rel_vel(A, e, i)
+    A = a/target["semi_major"]
+    U = rel_vel(A, e, i, target)
     abs_cot_alpha = np.abs(cot_alpha(A, e))
     
     if (A < 1): return 0
-    return (RADIUS_EARTH**2 * U) / (2 * np.pi * np.sin(i) * SEMI_MAJOR_EARTH
-                                    * a**2 * np.sqrt(1-e**2) * abs_cot_alpha)
+    return (target["radius"]**2 * U) / (2 * np.pi * np.sin(i)
+                                        * target["semi_major"] * a**2 *
+                                        np.sqrt(1-e**2) * abs_cot_alpha)
     
     
-def collision_probability(a, e, i, t):
+
+
+def collision_probability(a, e, i, t, target):
     """
     Takes the semi-major axis, a, eccentricity, e, and orbital inclination, i,
     of a particle and returns the probability of that particle hitting Earth
@@ -83,7 +97,6 @@ def collision_probability(a, e, i, t):
     return:    dimentionless
     """
     
-    P_F = prob_per_time(a, e, i)
+    P_F = prob_per_time(a, e, i, target)
     
     return 1 - np.exp(-P_F * t)
-    

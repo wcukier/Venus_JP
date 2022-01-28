@@ -1,6 +1,7 @@
 {
-"source": "4",
-"planets": ["3", "4", "5"],
+"source": "2",
+"target": "3",
+"planets": ["2", "3", "4", "5", "6", "7", "8"],
 "YEAR_STEP": 5000,
 "PARTICLES_PER_RUN": 10,
 "v_inf": 1000,

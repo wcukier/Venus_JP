@@ -3,9 +3,9 @@ sim.py
 author: Wolf Cukier
 Simulates the collisional timescale of meteroid ejecta from Venus
 """
-from constants import *
-from particles import initial_state
-from collisions import collision_probability
+from timescale.constants import *
+from timescale.particles import initial_state
+from timescale.collisions import collision_probability
 import rebound
 import numpy as np
 import sys
@@ -157,7 +157,9 @@ def log(sim, logger, n, year):
             p = sim.particles[f"{h}"]
             o = p.calculate_orbit(primary = sim.particles[0])
             prob = collision_probability(o.a, o.e, o.inc, 
-                                         YEAR_STEP*SEC_PER_YEAR)
+                                         YEAR_STEP*SEC_PER_YEAR,
+                                         config["target"])
+
             logger[step, h, :] = [o.a, o.e, o.inc, prob]
         except:
             logger[step, h, :] = [np.nan, np.nan, np.nan, np.nan]
@@ -245,8 +247,3 @@ def sim_set_states(n, max_years, v_inf, start, end, states):
 if (__name__ == "__main__"):
     logger = simulate(int(sys.argv[1]), int(sys.argv[2]), float(sys.argv[3]))
     write_log(logger, float(sys.argv[3]), int(sys.argv[4]))
-    
-    
-    
-    
-    

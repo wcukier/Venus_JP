@@ -1,0 +1,11 @@
+v        r      desc
+--------------------
+1        1      launch from earth
+1        99     launch from mars (7 planets)
+1        300    launch from mars (3 planets)
+1        2      launch from venus at v = 1 km/s
+2        3      launch from venus at v = 2 km/s
+3        3      launch from venus at v = 3 km/s
+
+0        4      launch from venus at v = 0.5 km/s
+0        5      launch from venus at v = .25 km/s

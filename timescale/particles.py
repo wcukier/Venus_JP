@@ -7,7 +7,7 @@ my Venus JP
 
 import spiceypy as spice
 import numpy as np
-from constants import *
+from timescale.constants import *
 import json
 
 with open("data/planets.json") as f:
