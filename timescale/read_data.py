@@ -4,6 +4,10 @@ author: Wolf Cukier
 Reads and processes the data produced by the Venus_JP simulation.
 """
 import numpy as np
+import json
+from tqdm import tqdm
+from timescale.constants import *
+from timescale.collisions import collision_probability
 
 def load_data(v_inf, run_num, path="output/"):
     """
@@ -50,8 +54,10 @@ def cume_prob(data):
 
     for t in range(part_probs.shape[0]):
         for p in range(part_probs.shape[1]):
-            if (~np.isnan(part_probs[t][p])):
-                cume_part_probs[t+1][p] = cume_part_probs[t][p] * (1-part_probs[t][p])
+            if (~np.isnan(part_probs[t][p]) and part_probs[t][p] > 0
+                and part_probs[t][p] < 1):
+                cume_part_probs[t+1][p] = cume_part_probs[t][p] * (
+                    1-part_probs[t][p])
             else:
                 cume_part_probs[t+1][p] = cume_part_probs[t][p]
 
@@ -62,28 +68,31 @@ def cume_prob(data):
 
     return  1 - cume_probs
 
-def test(data):
+def recalculate_data(data, target_id, YEAR_STEP = 5000):
     """
-    TODO: Remove
+    Takes in data and the key of the target, target_id, and returns the
+    cume_prob of the data with that target
+
+    Input
+    data:         m, dimentionless, degrees, dimentionless
+    target:       string "2"-"8"
+
+    Output
+    cume_probs:   array, dimentionless (probability)
     """
-    part_probs = data[:,:,3]
-    part_probs[np.isnan(part_probs)] = 0
-    cume_part_probs = np.ones((part_probs.shape[0]+1, part_probs.shape[1]))
 
-    for t in range(part_probs.shape[0]):
-        for p in range(part_probs.shape[1]):
-            if (~np.isnan(part_probs[t][p])):
-                cume_part_probs[t+1][p] = cume_part_probs[t][p] * (1-part_probs[t][p])
-            else:
-                cume_part_probs[t+1][p] = cume_part_probs[t][p]
 
-    return cume_part_probs
+    with open("../data/planets.json") as f:
+        planets = json.load(f)
+        target = planets[target_id]
 
-    cume_probs = np.ones(cume_part_probs.shape[0])
+    for t in tqdm(range(data.shape[0])):
+        for p in range(data.shape[1]):
+            data[t,p,3] = collision_probability(data[t,p,0], data[t,p,1],
+                                                data[t,p,2],
+                                                YEAR_STEP*SEC_PER_YEAR,
+                                                target)
 
-    for i in range(cume_part_probs.shape[0]):
-        cume_probs[i] = np.mean(cume_part_probs[i])
 
-    return  1 - cume_probs
-
+    return cume_prob(data)
 
