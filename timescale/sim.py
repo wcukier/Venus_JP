@@ -33,7 +33,7 @@ def initialize(max_years, n):
     sim.units = ("s", "m", "kg")
     sim.integrator = "mercurius"
     sim.ri_whfast.safe_mode = 0
-#    sim.ri_whfast.corrector = 11
+    sim.ri_whfast.corrector = 11
     sim.dt = 1e4
     sim.ri_ias15.min_dt = 1e-4 * sim.dt
     sim.testparticle_type = 0
@@ -158,10 +158,11 @@ def log(sim, logger, n, year):
             o = p.calculate_orbit(primary = sim.particles[0])
             prob = collision_probability(o.a, o.e, o.inc, 
                                          YEAR_STEP*SEC_PER_YEAR,
-                                         config["target"])
+                                         planets[config["target"]])
 
             logger[step, h, :] = [o.a, o.e, o.inc, prob]
-        except:
+        except Exception as e:
+            print(e)
             logger[step, h, :] = [np.nan, np.nan, np.nan, np.nan]
 
     return
