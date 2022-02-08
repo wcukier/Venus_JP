@@ -70,7 +70,7 @@ def initialize(max_years, n):
     sim.collision_resolve = resolve_collision
     print("Simulation Initialized", flush=True, file = sys.stderr)
 
-    return sim, np.zeros((int(max_years/YEAR_STEP)+1,n,4))
+    return sim, np.zeros((int(max_years/YEAR_STEP)+1,n,5))
 
 
 def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
@@ -193,10 +193,11 @@ def log(sim, logger, n, year, E_0):
                                          YEAR_STEP*SEC_PER_YEAR,
                                          planets[config["target"]])
 
-            logger[step, h, :] = [o.a, o.e, o.inc, prob]
+            logger[step, h, :] = [o.a, o.e, o.inc, prob,
+                                  collided[config["target"]]]
         except Exception as e:
             print(e)
-            logger[step, h, :] = [np.nan, np.nan, np.nan, np.nan]
+            logger[step, h, :] = [np.nan, np.nan, np.nan, np.nan, np.nan]
 
     E_1 = sim.calculate_energy()
     err = (E_1 - E_0) / E_0
