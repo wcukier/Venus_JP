@@ -89,6 +89,7 @@ def initial_state(n, v_inf, planets = ["2", "3", "5"], source_id="2"):
         print("source_id not in planet array")
         raise
 
+    print(planets)
     time = random_time(1850, 2150)
     states = np.zeros((n+len(planets), 6))
 
