@@ -19,6 +19,6 @@ MASS_NEPTUNE      =  1.02413e26                               # kg
 SEMI_MAJOR_EARTH  =  1.495979e+11                             # m
 RADIUS_EARTH      =  6.3781e6                                 # m
 RADIUS_VENUS      =  6.0518e6                                 # m
-G                 =  6.6743e-11                               # m^3k g^-1 s^-2
+G                 =  6.6743e-11                               # m^3k kg^-1 s^-2
 SEC_PER_YEAR      =  31557600                                 # s/yr
 AU                =  SEMI_MAJOR_EARTH                         # m

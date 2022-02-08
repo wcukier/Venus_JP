@@ -1,6 +1,8 @@
 #output files
 *.npy
 logs/*
+scratch/*
+figures/*
 
 testing.ipynb
 .vscode

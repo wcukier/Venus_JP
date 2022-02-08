@@ -3,6 +3,7 @@ sim.py
 author: Wolf Cukier
 Simulates the collisional timescale of meteroid ejecta from Venus
 """
+from pydoc import resolve
 from timescale.constants import *
 from timescale.particles import initial_state
 from timescale.collisions import collision_probability
@@ -18,6 +19,34 @@ with open("config.json") as f:
     
 N_ACTIVE = len(config["planets"]) + 1
 YEAR_STEP = config["YEAR_STEP"]
+collided = np.zeros(8)
+
+
+def resolve_collision(sim_pointer, collision):
+    """
+    Function used to resolve collisions.  Takes in sim_pointer and collisions as
+    defined by the REBOUND API.  Returns 0 if no particles are to be removed, 1
+    if the first particle is to be removed, 2 if the second particle is to be
+    removed
+    """
+    sim = sim_pointer.contents
+    p1 = sim.particles[collision.p1]
+    p2 = sim.particles[collision.p2]
+
+    if (p1.m < 1 and p2.m < 1): return 0
+    if (p1.m == p2.m): raise
+
+    if (p1.m > p2.m): out = 2
+    else: out = 1
+
+    for i in config["planets"]:
+        if np.max((p1.m, p2.m)) == j["mass"]:
+            global collided
+            collided[int(i)] += 1
+            print(f"Planet: {j}, {collided[i]} particles removed", flush=True,
+                  file=sys.stderr)
+
+    return out
 
 
 def initialize(max_years, n):
@@ -37,6 +66,8 @@ def initialize(max_years, n):
     sim.dt = 1e4
     sim.ri_ias15.min_dt = 1e-4 * sim.dt
     sim.testparticle_type = 0
+    sim.collision = "linetree"
+    sim.collision_resolve = resolve_collision
     print("Simulation Initialized", flush=True, file = sys.stderr)
     
     return sim, np.zeros((int(max_years/YEAR_STEP)+1,n,4))
@@ -178,35 +209,35 @@ def write_log (logger, v_inf, run_num):
     return
     
     
-def simulate(n, max_years, v_inf):
-    """
-    Simulates n particles launched 300 planet radii from the source planet at a 
-    velocity of v_inf for max_years amount of time.  Returns a log of the 
-    semi-major axis, eccentricity, inclination, and probability of hitting earth
-    for each particle as a numpy array. If start and end are specified, only 
-    particles with array bounds between start and end are actually added.
+# def simulate(n, max_years, v_inf):
+#     """
+#     Simulates n particles launched 300 planet radii from the source planet at a
+#     velocity of v_inf for max_years amount of time.  Returns a log of the
+#     semi-major axis, eccentricity, inclination, and probability of hitting earth
+#     for each particle as a numpy array. If start and end are specified, only
+#     particles with array bounds between start and end are actually added.
     
-    Units
-    n:           dimentionless
-    max_years:   years
-    v_inf:       m/s
-    start:       dimentionless
-    end:         dimentionless
-    return:      m, dimentionless, degrees, dimentionless (max_years+1, n, 4)
-    """
+#     Units
+#     n:           dimentionless
+#     max_years:   years
+#     v_inf:       m/s
+#     start:       dimentionless
+#     end:         dimentionless
+#     return:      m, dimentionless, degrees, dimentionless (max_years+1, n, 4)
+#     """
     
-    sim, logger = initialize(max_years, n)
-    add_particles(sim, n, v_inf)
+#     sim, logger = initialize(max_years, n)
+#     add_particles(sim, n, v_inf)
     
-    year = 0
-    n_removed = 0
-    while(year <= max_years):
-        step(sim, year)
-        n_removed += remove_particles(sim, n_removed)
-        log(sim, logger, n, year)
-        year += YEAR_STEP
+#     year = 0
+#     n_removed = 0
+#     while(year <= max_years):
+#         step(sim, year)
+#         n_removed += remove_particles(sim, n_removed)
+#         log(sim, logger, n, year)
+#         year += YEAR_STEP
         
-    return logger
+#     return logger
 
 
 def sim_set_states(n, max_years, v_inf, start, end, states):
