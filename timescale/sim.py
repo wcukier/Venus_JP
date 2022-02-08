@@ -83,8 +83,10 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
 
     print(f"Planets and and {n} particles have been added.",
          flush = True, file=sys.stderr)
+
+    E_0 = sim.calculate_energy()
     
-    return
+    return E_0
     
 def step(sim, year):
     """
@@ -136,7 +138,7 @@ def remove_particles(sim, n_removed):
             
     return n_removed
         
-def log(sim, logger, n, year):
+def log(sim, logger, n, year, E_0):
     """
     Stores the semi-major axis, eccentricity, and inclination for each of n
     massless particles in sim into log, in the corresponding location based on
@@ -165,6 +167,9 @@ def log(sim, logger, n, year):
             print(e)
             logger[step, h, :] = [np.nan, np.nan, np.nan, np.nan]
 
+    E_1 = sim.calculate_energy()
+    err = (E_1 - E_0) / E_0
+    print(f"Percent Energy error: {err}", file=sys.stderr, flush=True)
     return
 
 def write_log (logger, v_inf, run_num):
@@ -197,14 +202,14 @@ def simulate(n, max_years, v_inf):
     """
     
     sim, logger = initialize(max_years, n)
-    add_particles(sim, n, v_inf)
+    E_0 = add_particles(sim, n, v_inf)
     
     year = 0
     n_removed = 0
     while(year <= max_years):
         step(sim, year)
         n_removed += remove_particles(sim, n_removed)
-        log(sim, logger, n, year)
+        log(sim, logger, n, year, E_0)
         year += YEAR_STEP
         
     return logger
@@ -232,14 +237,15 @@ def sim_set_states(n, max_years, v_inf, start, end, states):
     if (end < 0): end = n
     
     sim, logger = initialize(max_years, end-start)
-    add_particles(sim, n, v_inf, start=start, end=end, states=states)
-    
+    E_0 = add_particles(sim, n, v_inf, start=start, end=end, states=states)
+
+
     year = 0
     n_removed = 0
     while(year <= max_years):
         step(sim, year)
         n_removed += remove_particles(sim, n_removed)
-        log(sim, logger, end-start, year)
+        log(sim, logger, end-start, year, E_0)
         year += YEAR_STEP
         
     return logger
