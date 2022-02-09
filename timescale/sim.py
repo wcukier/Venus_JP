@@ -66,6 +66,7 @@ def initialize(max_years, n):
     sim.dt = 1e4
     sim.ri_ias15.min_dt = 1e-4 * sim.dt
     sim.testparticle_type = 0
+    sim.configure_box(40 * AU)
     sim.collision = "linetree"
     sim.collision_resolve = resolve_collision
     print("Simulation Initialized", flush=True, file = sys.stderr)
@@ -100,7 +101,7 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
     sim.move_to_hel()
 
     for i , p in enumerate(config["planets"]):
-        sim.add(m = planets[p]["mass"],
+        sim.add(m = planets[p]["mass"], r = planets[p]["radius"],
                 x = states[i,0], y = states[i,1], z = states[i,2],
                 vx = states[i,3], vy = states[i,4], vz = states[i,5])
 
