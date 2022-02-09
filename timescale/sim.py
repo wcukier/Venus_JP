@@ -32,7 +32,7 @@ def resolve_collision(sim_pointer, collision):
     sim = sim_pointer.contents
     p1 = sim.particles[collision.p1]
     p2 = sim.particles[collision.p2]
-
+    print(f"{p1.m}    {p2.m}")
     if (p1.m < 1 and p2.m < 1): return 0
     if (p1.m == p2.m): raise
 
