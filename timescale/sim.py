@@ -60,7 +60,7 @@ def initialize(max_years, n):
     """
     sim = rebound.Simulation()
     sim.units = ("s", "m", "kg")
-    sim.integrator = "mercurius"
+    sim.integrator = "whfast"
     sim.ri_whfast.safe_mode = 0
     sim.ri_whfast.corrector = 11
     sim.dt = 1e4
