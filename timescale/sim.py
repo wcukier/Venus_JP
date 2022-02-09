@@ -233,16 +233,16 @@ def write_log (logger, v_inf, run_num):
 #     return:      m, dimentionless, degrees, dimentionless (max_years+1, n, 4)
 #     """
 
-    sim, logger = initialize(max_years, n)
-    E_0 = add_particles(sim, n, v_inf)
+    # sim, logger = initialize(max_years, n)
+    # E_0 = add_particles(sim, n, v_inf)
 
-    year = 0
-    n_removed = 0
-    while(year <= max_years):
-        step(sim, year)
-        n_removed += remove_particles(sim, n_removed)
-        log(sim, logger, n, year, E_0)
-        year += YEAR_STEP
+    # year = 0
+    # n_removed = 0
+    # while(year <= max_years):
+    #     step(sim, year)
+    #     n_removed += remove_particles(sim, n_removed)
+    #     log(sim, logger, n, year, E_0)
+    #     year += YEAR_STEP
 
 #     return logger
 
