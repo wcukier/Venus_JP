@@ -35,8 +35,7 @@ def resolve_collision(sim_pointer, collision):
     p2 = sim.particles[collision.p2]
     # if (np.abs(np.max((p1.m, p2.m)) > 1e30)):
     #     return 0
-    print(f"{p1.m}    {p2.m}",flush=True)
-    print(f"{p1.r}    {p2.r}",flush=True)
+
 
     if (p1.m < 1 and p2.m < 1): return 0
     if (p1.m == p2.m): raise
@@ -49,8 +48,6 @@ def resolve_collision(sim_pointer, collision):
     global collided
 
     if (np.abs(np.max((p1.m, p2.m)) > 1e30)):
-        return 0
-        if(p1 ** p2 > .01 * AU): return 0
         collided[0] += 1
         print(f"Sun, {collided[0]} particles removed", flush=True,
                 file=sys.stderr)
