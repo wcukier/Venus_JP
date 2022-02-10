@@ -17,6 +17,7 @@ MASS_SATURN       =  5.68319e26                               # kg
 MASS_URANUS       =  8.6810e25                                # kg
 MASS_NEPTUNE      =  1.02413e26                               # kg
 SEMI_MAJOR_EARTH  =  1.495979e+11                             # m
+RADIUS_SUN        =  6.957e8                                  # m
 RADIUS_EARTH      =  6.3781e6                                 # m
 RADIUS_VENUS      =  6.0518e6                                 # m
 G                 =  6.6743e-11                               # m^3k kg^-1 s^-2
