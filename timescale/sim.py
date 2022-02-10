@@ -18,8 +18,9 @@ with open("config.json") as f:
     config = json.load(f)
 
 N_ACTIVE = len(config["planets"]) + 1
-YEAR_STEP = config["YEAR_STEP"]
-collided = np.zeros(8)
+# YEAR_STEP = config["YEAR_STEP"]
+YEAR_STEP = .001
+collided = np.zeros(9)
 
 
 def resolve_collision(sim_pointer, collision):
@@ -32,24 +33,38 @@ def resolve_collision(sim_pointer, collision):
     sim = sim_pointer.contents
     p1 = sim.particles[collision.p1]
     p2 = sim.particles[collision.p2]
-    print(f"{p1.m}    {p2.m}")
+    # if (np.abs(np.max((p1.m, p2.m)) > 1e30)):
+    #     return 0
+    print(f"{p1.m}    {p2.m}",flush=True)
+    print(f"{p1.r}    {p2.r}",flush=True)
+
     if (p1.m < 1 and p2.m < 1): return 0
     if (p1.m == p2.m): raise
 
-    if (p1.m > p2.m): out = 2
-    else: out = 1
+    if (p1.m > p2.m):
+        out = 2
+    else:
+        out = 1
+    sim.ri_whfast.recalculate_coordinates_this_timestep = 1
+    global collided
+
+    if (np.abs(np.max((p1.m, p2.m)) > 1e30)):
+        return 0
+        if(p1 ** p2 > .01 * AU): return 0
+        collided[0] += 1
+        print(f"Sun, {collided[0]} particles removed", flush=True,
+                file=sys.stderr)
 
     for i in config["planets"]:
-        if np.max((p1.m, p2.m)) == i["mass"]:
-            global collided
+        if (np.abs(np.max((p1.m, p2.m)) - planets[i]["mass"])
+            < 0.1 * planets[i]["mass"]):
             collided[int(i)] += 1
-            print(f"Planet: {i}, {collided[i]} particles removed", flush=True,
+            print(f"Planet: {i}, {collided[int(i)]} particles removed", flush=True,
                   file=sys.stderr)
-
     return out
 
 
-def initialize(max_years, n):
+def initialize(max_years, n, integrator="whfast"):
     """
     Initialize the rebound simulation which will later be run for max_years.
     Returns the simulation and an array to log the output in.  Prints success to
@@ -60,14 +75,13 @@ def initialize(max_years, n):
     """
     sim = rebound.Simulation()
     sim.units = ("s", "m", "kg")
-    sim.integrator = "mercurius"
+    sim.integrator = integrator
     sim.ri_whfast.safe_mode = 0
     sim.ri_whfast.corrector = 11
     sim.dt = 1e4
     sim.ri_ias15.min_dt = 1e-4 * sim.dt
     sim.testparticle_type = 0
-    sim.configure_box(40 * AU)
-    sim.collision = "linetree"
+    sim.collision = "direct"
     sim.collision_resolve = resolve_collision
     print("Simulation Initialized", flush=True, file = sys.stderr)
 
@@ -97,7 +111,8 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
         states = initial_state(n, v_inf, planets = config["planets"],
                                source_id=config["source"])
 
-    sim.add(m = MASS_SUN)
+    sim.add(m = MASS_SUN, r = 0)
+    print(sim.particles[0].r)
     sim.move_to_hel()
 
     for i , p in enumerate(config["planets"]):
@@ -108,7 +123,7 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
     for i in range(3 + start, end+3):
         sim.add(x = states[i,0], y = states[i,1], z = states[i,2],
                 vx = states[i,3], vy = states[i,4], vz = states[i,5],
-                hash = f"{i-3-start}")
+                hash = f"{i-3-start}", r = 0)
 
     sim.move_to_com()
     sim.n_active = N_ACTIVE
