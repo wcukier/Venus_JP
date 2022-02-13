@@ -18,8 +18,8 @@ with open("config.json") as f:
     config = json.load(f)
 
 N_ACTIVE = len(config["planets"]) + 1
-# YEAR_STEP = config["YEAR_STEP"]
-YEAR_STEP = .001
+YEAR_STEP = config["YEAR_STEP"]
+
 collided = np.zeros(9)
 
 
@@ -75,8 +75,8 @@ def initialize(max_years, n, integrator="whfast"):
 
     sim.integrator = integrator
 
-    sim.ri_whfast.safe_mode = 0
-    sim.ri_whfast.corrector = 11
+    sim.ri_whfast.safe_mode = 1
+    sim.ri_whfast.corrector = 0
     sim.dt = 1e4
     sim.ri_ias15.min_dt = 1e-4 * sim.dt
     sim.testparticle_type = 0
@@ -174,7 +174,7 @@ def remove_particles(sim, n_removed):
                   file = sys.stderr)
             sim.ri_whfast.recalculate_coordinates_this_timestep = 1
 
-        elif d > 10*AU:
+        elif d > 100*AU:
             sim.remove(hash = h)
             n_removed += 1
             print(f"Removed escaping particle. \
