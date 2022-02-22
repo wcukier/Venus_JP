@@ -3,7 +3,6 @@ sim.py
 author: Wolf Cukier
 Simulates the collisional timescale of meteroid ejecta from Venus
 """
-from pydoc import resolve
 from timescale.constants import *
 from timescale.particles import initial_state
 from timescale.collisions import collision_probability
@@ -30,6 +29,8 @@ def resolve_collision(sim_pointer, collision):
     if the first particle is to be removed, 2 if the second particle is to be
     removed
     """
+
+    print("In Collision Function")
     sim = sim_pointer.contents
     p1 = sim.particles[collision.p1]
     p2 = sim.particles[collision.p2]
@@ -73,14 +74,15 @@ def initialize(max_years, n, integrator="whfast"):
     sim = rebound.Simulation()
     sim.units = ("s", "m", "kg")
 
+#    sim.integrator = "mercurius"
     sim.integrator = integrator
 
-    sim.ri_whfast.safe_mode = 1
-    sim.ri_whfast.corrector = 0
+#    sim.ri_whfast.safe_mode = 0
+#    sim.ri_whfast.corrector = 11
     sim.dt = 1e4
     sim.ri_ias15.min_dt = 1e-4 * sim.dt
     sim.testparticle_type = 0
-    sim.collision = "direct"
+    sim.collision = "line"
     sim.collision_resolve = resolve_collision
     print("Simulation Initialized", flush=True, file = sys.stderr)
 
@@ -119,12 +121,17 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
                 x = states[i,0], y = states[i,1], z = states[i,2],
                 vx = states[i,3], vy = states[i,4], vz = states[i,5])
 
-    for i in range(3 + start, end+3):
+    for i in range(N_ACTIVE + start-1, end+N_ACTIVE-1):
         sim.add(x = states[i,0], y = states[i,1], z = states[i,2],
                 vx = states[i,3], vy = states[i,4], vz = states[i,5],
-                hash = f"{i-3-start}", r = 0)
+                hash = f"{i-N_ACTIVE-start}", r = 0)
 
     sim.move_to_com()
+
+    ps = sim.particles
+    for p in sim.particles[N_ACTIVE:]:
+        print(f"Scaled Dist: {(sim.particles[0] ** p)/planets[config['source']]['semi_major']}",
+              flush=True, file=sys.stderr)
     sim.n_active = N_ACTIVE
 
     print(f"Planets and and {n} particles have been added.",
@@ -291,7 +298,7 @@ def sim_set_states(n, max_years, v_inf, start, end, states):
     n_removed = 0
     while(year <= max_years):
         step(sim, year)
-        n_removed += remove_particles(sim, n_removed)
+        n_removed = remove_particles(sim, n_removed)
         log(sim, logger, end-start, year, E_0)
         year += YEAR_STEP
 
