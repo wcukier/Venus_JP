@@ -10,6 +10,7 @@ import rebound
 import numpy as np
 import sys
 import json
+from timescale.rotations import R_m
 
 with open("data/planets.json") as f:
     planets = json.load(f)
@@ -129,17 +130,12 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
     sim.move_to_com()
 
     ps = sim.particles
-    for p in sim.particles[N_ACTIVE:]:
-        print(f"Scaled Dist: {(sim.particles[0] ** p)/planets[config['source']]['semi_major']}",
-              flush=True, file=sys.stderr)
     sim.n_active = N_ACTIVE
 
     print(f"Planets and and {n} particles have been added.",
          flush = True, file=sys.stderr)
 
-    E_0 = sim.calculate_energy()
-
-    return E_0
+    return sim.calculate_angular_momentum()
 
 def step(sim, year):
     """
@@ -191,7 +187,7 @@ def remove_particles(sim, n_removed):
 
     return n_removed
 
-def log(sim, logger, n, year, E_0):
+def log(sim, logger, n, year):
     """
     Stores the semi-major axis, eccentricity, and inclination for each of n
     massless particles in sim into log, in the corresponding location based on
@@ -221,9 +217,6 @@ def log(sim, logger, n, year, E_0):
             print(e)
             logger[step, h, :] = [np.nan, np.nan, np.nan, np.nan, np.nan]
 
-    E_1 = sim.calculate_energy()
-    err = (E_1 - E_0) / E_0
-    print(f"Percent Energy error: {err}", file=sys.stderr, flush=True)
     return
 
 def write_log (logger, v_inf, run_num):
@@ -268,6 +261,20 @@ def write_log (logger, v_inf, run_num):
 
 #     return logger
 
+def realign(n, states):
+    """
+    Realigns the states such that the x-y plane is the invariable plane ie the
+    angular momentum vector is coincident with z_hat.  Takes in the number of
+    particles, n, and the states, states, and returns the transformed states.
+    """
+    sim, _ = initialize(1000, 100)
+
+    y = states.copy()
+    L = add_particles(sim, n, 1000, states=y)
+    y[:, :3] = np.matmul(R_m(L), states[:,:3].T).T
+    y[:, 3:] = np.matmul(R_m(L), states[:,3:].T).T
+
+    return y
 
 def sim_set_states(n, max_years, v_inf, start, end, states):
     """
@@ -291,7 +298,8 @@ def sim_set_states(n, max_years, v_inf, start, end, states):
     if (end < 0): end = n
 
     sim, logger = initialize(max_years, end-start)
-    E_0 = add_particles(sim, n, v_inf, start=start, end=end, states=states)
+    states = realign(n, states)
+    add_particles(sim, n, v_inf, start=start, end=end, states=states)
 
 
     year = 0
@@ -299,7 +307,7 @@ def sim_set_states(n, max_years, v_inf, start, end, states):
     while(year <= max_years):
         step(sim, year)
         n_removed = remove_particles(sim, n_removed)
-        log(sim, logger, end-start, year, E_0)
+        log(sim, logger, end-start, year)
         year += YEAR_STEP
 
     return logger
