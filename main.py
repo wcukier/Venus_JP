@@ -29,7 +29,9 @@ if __name__ == "__main__":
     except:
         print("No run number provided.  Defaulting to 0.", file=sys.stderr)
     
-  
+    print(f"This is Run {run_num}.  Particles launched from planet \
+{source} at {v_inf} m/s.", file=sys.stderr, flush=True)
+
     param_array = []
     start = 0
     end = PARTICLES_PER_RUN

@@ -31,7 +31,6 @@ def resolve_collision(sim_pointer, collision):
     removed
     """
 
-    print("In Collision Function")
     sim = sim_pointer.contents
     p1 = sim.particles[collision.p1]
     p2 = sim.particles[collision.p2]
@@ -87,8 +86,11 @@ def initialize(max_years, n, integrator="whfast"):
     sim.dt = 1e4
     sim.ri_ias15.min_dt = 1e-4 * sim.dt
     sim.testparticle_type = 0
-    sim.collision = "line"
-    sim.collision_resolve = resolve_collision
+    if(config["DO_COLLISIONS"]):
+        sim.collision = "line"
+        sim.collision_resolve = resolve_collision
+    else:
+        sim.collsion = "none"
     print("Simulation Initialized", flush=True, file = sys.stderr)
     global logger
     logger = np.zeros((int(max_years/YEAR_STEP)+1,n,5))
@@ -214,10 +216,10 @@ def log(sim, logger, n, year):
             o = p.calculate_orbit(primary = sim.particles[0])
             prob = collision_probability(o.a, o.e, o.inc,
                                          YEAR_STEP*SEC_PER_YEAR,
-                                         planets[config["target"]])
+                                         planets[str(config["target"])])
 
             logger[step, h, :] = [o.a, o.e, o.inc, prob,
-                                  collided[config["target"]]]
+                                  collided[int(config["target"])]]
         except Exception as e:
             print(e)
             if (logger[-1, h, 0] < 0):
@@ -272,10 +274,14 @@ def write_log (logger, v_inf, run_num):
 
 def realign(n, states):
     """
+    Depreciated
+
     Realigns the states such that the x-y plane is the invariable plane ie the
     angular momentum vector is coincident with z_hat.  Takes in the number of
     particles, n, and the states, states, and returns the transformed states.
     """
+    return states
+    
     sim, _ = initialize(1000, 100)
 
     y = states.copy()
