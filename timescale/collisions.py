@@ -23,9 +23,11 @@ def cot_alpha(A, e):
     Equation Source: Wetherill (1969)
     """
     # if ((A**2 * e**2) < ((A-1)**2)): return np.nan
-    result = np.sqrt((A**2 * e**2 - (A - 1)**2) / (A**2 * (1 - e**2)))
+    # result = np.sqrt((A**2 * e**2 - (A - 1)**2) / (A**2 * (1 - e**2)))
+
+    rsq = ((A**2) * (e**2) - (A - 1)**2 )/ ((A**2) * (1-e**2))
     # print(f"cot: {result}")
-    return result
+    return np.sqrt(rsq)
 
 def rel_vel(A, e, i, target):
     """
@@ -48,12 +50,13 @@ def rel_vel(A, e, i, target):
     # result = (np.sqrt((G * MASS_SUN / target["semi_major"]) *
     #         (3 - 1/A - 2 * np.sqrt(A * (1 - (e**2))) * np.cos(i))))
 
-    result = (np.sqrt((G * MASS_SUN / target["semi_major"]) *
-            (3 - 1/A - 2 * np.sqrt(A * (1 - (e**2))) * np.cos(i))))
+    # result = (np.sqrt((G * MASS_SUN / target["semi_major"]) *
+    #         (3 - 1/A - 2 * np.sqrt(A * (1 - (e**2))) * np.cos(i))))
 
+    Usq = (G * MASS_SUN / target["semi_major"]) * (3 - 1/A - 2 *np.cos(i) *np.sqrt(A * (1 - e**2)))
 
     # print(f'U:{result}')
-    return result
+    return np.sqrt(Usq)
 
 # def rel_vel(A, e, i, target):
 #     """
@@ -112,14 +115,29 @@ def prob_per_time(a, e, i, target):
 
     Equation Source: Wetherill (1969)
     """
-    if(np.isnan(a)): return 0
+    if(np.isnan(a)):return 0
     A = a/target["semi_major"]
-    q = A*(1 - e)
-    Q = A*(1 + e)
-    if((q > 1) or (Q<1)): return 0
+    # q = A*(1 - e)
+    # Q = A*(1 + e)
+    # if((q > 1) or (Q<1)): return 0
     # print(f"a: {a}, e: {e}, i: {i}")
     U = rel_vel(A, e, i, target)
     abs_cot_alpha = np.abs(cot_alpha(A, e))
+
+
+    P_F = ((target["radius"]**2) * U) / (2 * np.pi**2 * np.sin(i) * target["semi_major"] * (a**2) * np.sqrt((1-(e**2))) * abs_cot_alpha)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -127,10 +145,10 @@ def prob_per_time(a, e, i, target):
     # if ((A*(1-e)) > 1): return 0
     # print(type(U))
     # if (A < 1): return 0
-    P_F = (target["radius"]**2 * U) / (2 * np.pi**2 * np.sin(i)
-                                        * target["semi_major"]
-                                        * a**2
-                                        * np.sqrt(1-e**2) * abs_cot_alpha)
+    # P_F = (target["radius"]**2 * U) / (2 * np.pi**2 * np.sin(i)
+    #                                     * target["semi_major"]
+    #                                     * a**2
+    #                                     * np.sqrt(1-e**2) * abs_cot_alpha)
 
     # if np.isnan(P_F): return 0
     # if P_F < 0: return 0
@@ -152,5 +170,6 @@ def collision_probability(a, e, i, t, target):
     t:         s
     return:    dimentionless
     """
+    i = i + 1.57 * np.pi/180
     P_F = prob_per_time(a, e, i, target)
     return 1 - np.exp(-P_F * t)

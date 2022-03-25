@@ -44,10 +44,13 @@ def resolve_collision(sim_pointer, collision):
 
     if (p1.m > p2.m):
         out = 2
+        h = p2.hash
     else:
         out = 1
+        h = p1.hash
     sim.ri_whfast.recalculate_coordinates_this_timestep = 1
     global collided
+    global logger
 
     if (np.abs(np.max((p1.m, p2.m)) > 1e30)):
         collided[0] += 1
@@ -58,6 +61,7 @@ def resolve_collision(sim_pointer, collision):
         if (np.abs(np.max((p1.m, p2.m)) - planets[i]["mass"])
             < 0.1 * planets[i]["mass"]):
             collided[int(i)] += 1
+            logger[step, h, 0] = -int(i)
             print(f"Planet: {i}, {collided[int(i)]} particles removed", flush=True,
                   file=sys.stderr)
     return out
@@ -86,8 +90,9 @@ def initialize(max_years, n, integrator="whfast"):
     sim.collision = "line"
     sim.collision_resolve = resolve_collision
     print("Simulation Initialized", flush=True, file = sys.stderr)
-
-    return sim, np.zeros((int(max_years/YEAR_STEP)+1,n,5))
+    global logger
+    logger = np.zeros((int(max_years/YEAR_STEP)+1,n,5))
+    return sim, logger
 
 
 def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
@@ -215,7 +220,11 @@ def log(sim, logger, n, year):
                                   collided[config["target"]]]
         except Exception as e:
             print(e)
-            logger[step, h, :] = [np.nan, np.nan, np.nan, np.nan, np.nan]
+            if (logger[-1, h, 0] < 0):
+                logger[step, h, :] = [logger[-1, h, 0], np.nan, np.nan,
+                                      np.nan, np.nan]
+            else:
+                logger[step, h, :] = [np.nan, np.nan, np.nan, np.nan, np.nan]
 
     return
 

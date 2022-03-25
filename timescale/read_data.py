@@ -7,7 +7,7 @@ import numpy as np
 import json
 from tqdm import tqdm
 from timescale.constants import *
-from timescale.collisionsv2 import collision_probability, prob_per_time
+from timescale.collisions import collision_probability, prob_per_time
 
 def load_data(v_inf, run_num, path="output/"):
     """
