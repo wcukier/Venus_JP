@@ -3,7 +3,6 @@ sim.py
 author: Wolf Cukier
 Simulates the collisional timescale of meteroid ejecta from Venus
 """
-from fluids import helical_transition_Re_Seth_Stahel
 from timescale.constants import *
 from timescale.particles import initial_state
 from timescale.collisions import collision_probability
@@ -62,7 +61,7 @@ def resolve_collision(sim_pointer, collision):
         if (np.abs(np.max((p1.m, p2.m)) - planets[i]["mass"])
             < 0.1 * planets[i]["mass"]):
             collided[int(i)] += 1
-            p_hash = hashes[str(h.value)]
+            p_hash = hashes[str(h)]
             logger[-1, int(p_hash), 0] = -int(i)
             print(f"Planet: {i}, {collided[int(i)]} particles removed", flush=True,
                   file=sys.stderr)
@@ -141,7 +140,7 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
 
     ps = sim.particles
     global hashes
-    hashes = {str(ps[str(i-N_ACTIVE-start)].h.value): str(i-N_ACTIVE-start)
+    hashes = {str(ps[str(i-N_ACTIVE-start)].h): str(i-N_ACTIVE-start)
               for i in range(N_ACTIVE + start-1, end+N_ACTIVE-1)}
 
 
