@@ -11,6 +11,7 @@ import numpy as np
 import sys
 import json
 from timescale.rotations import R_m
+from rebound import hash as r_hash
 
 with open("data/planets.json") as f:
     planets = json.load(f)
@@ -50,7 +51,7 @@ def resolve_collision(sim_pointer, collision):
     sim.ri_whfast.recalculate_coordinates_this_timestep = 1
     global collided
     global logger
-    global hashes
+
     if (np.abs(np.max((p1.m, p2.m)) > 1e30)):
         collided[0] += 1
         print(f"Sun, {collided[0]} particles removed", flush=True,
@@ -61,8 +62,7 @@ def resolve_collision(sim_pointer, collision):
         if (np.abs(np.max((p1.m, p2.m)) - planets[i]["mass"])
             < 0.1 * planets[i]["mass"]):
             collided[int(i)] += 1
-            p_hash = hashes[str(h)]
-            logger[-1, int(p_hash), 0] = -int(i)
+            logger[-1, int(h.value), 0] = -int(i)
             print(f"Planet: {i}, {collided[int(i)]} particles removed", flush=True,
                   file=sys.stderr)
     return out
@@ -134,15 +134,11 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
     for i in range(N_ACTIVE + start-1, end+N_ACTIVE-1):
         sim.add(x = states[i,0], y = states[i,1], z = states[i,2],
                 vx = states[i,3], vy = states[i,4], vz = states[i,5],
-                hash = f"{i-N_ACTIVE-start}", r = 0)
+                hash = r_hash(i-N_ACTIVE-start), r = 0)
 
     sim.move_to_com()
 
     ps = sim.particles
-    global hashes
-    hashes = {str(ps[str(i-N_ACTIVE-start)].h): str(i-N_ACTIVE-start)
-              for i in range(N_ACTIVE + start-1, end+N_ACTIVE-1)}
-
 
     sim.n_active = N_ACTIVE
 
@@ -184,7 +180,7 @@ def remove_particles(sim, n_removed):
         d = sim.particles[0] ** p
 
         if d < .01*AU:
-            sim.remove(hash = h)
+            sim.remove(hash = r_hash(h))
             n_removed += 1
             print(f"Removed sun-grazing particle. \
                   {n_removed} particles removed", flush = True,
@@ -192,7 +188,7 @@ def remove_particles(sim, n_removed):
             sim.ri_whfast.recalculate_coordinates_this_timestep = 1
 
         elif d > 100*AU:
-            sim.remove(hash = h)
+            sim.remove(hash = r_hash(h))
             n_removed += 1
             print(f"Removed escaping particle. \
                   {n_removed} particles removed", flush = True,
@@ -219,7 +215,7 @@ def log(sim, logger, n, year):
     step = int(year/YEAR_STEP)
     for h in range(n):
         try:
-            p = sim.particles[f"{h}"]
+            p = sim.particles[r_hash(h)]
             o = p.calculate_orbit(primary = sim.particles[0])
             prob = collision_probability(o.a, o.e, o.inc,
                                          YEAR_STEP*SEC_PER_YEAR,
