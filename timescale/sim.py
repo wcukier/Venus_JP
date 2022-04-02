@@ -58,10 +58,11 @@ def resolve_collision(sim_pointer, collision):
                 file=sys.stderr)
 
     for i in config["planets"]:
+        print(h, file=sys.stderr, flush=True)
         if (np.abs(np.max((p1.m, p2.m)) - planets[i]["mass"])
             < 0.1 * planets[i]["mass"]):
             collided[int(i)] += 1
-            logger[step, h, 0] = -int(i)
+            logger[-1, int(h), 0] = -int(i)
             print(f"Planet: {i}, {collided[int(i)]} particles removed", flush=True,
                   file=sys.stderr)
     return out
