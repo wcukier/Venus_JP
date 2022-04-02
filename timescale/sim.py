@@ -51,7 +51,7 @@ def resolve_collision(sim_pointer, collision):
     sim.ri_whfast.recalculate_coordinates_this_timestep = 1
     global collided
     global logger
-
+    global hashes
     if (np.abs(np.max((p1.m, p2.m)) > 1e30)):
         collided[0] += 1
         print(f"Sun, {collided[0]} particles removed", flush=True,
@@ -62,7 +62,8 @@ def resolve_collision(sim_pointer, collision):
         if (np.abs(np.max((p1.m, p2.m)) - planets[i]["mass"])
             < 0.1 * planets[i]["mass"]):
             collided[int(i)] += 1
-            logger[-1, int(h), 0] = -int(i)
+            p_hash = hashes[str(h.value)]
+            logger[-1, int(p_hash), 0] = -int(i)
             print(f"Planet: {i}, {collided[int(i)]} particles removed", flush=True,
                   file=sys.stderr)
     return out
@@ -140,7 +141,7 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
 
     ps = sim.particles
     global hashes
-    hashes = {str(i-N_ACTIVE-start): ps[str(i-N_ACTIVE-start)].h
+    hashes = {str(ps[str(i-N_ACTIVE-start)].h.value): str(i-N_ACTIVE-start)
               for i in range(N_ACTIVE + start-1, end+N_ACTIVE-1)}
 
 
