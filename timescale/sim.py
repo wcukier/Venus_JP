@@ -3,6 +3,7 @@ sim.py
 author: Wolf Cukier
 Simulates the collisional timescale of meteroid ejecta from Venus
 """
+from fluids import helical_transition_Re_Seth_Stahel
 from timescale.constants import *
 from timescale.particles import initial_state
 from timescale.collisions import collision_probability
@@ -137,6 +138,11 @@ def add_particles(sim, n, v_inf, start = 0, end = -1, states = -1):
     sim.move_to_com()
 
     ps = sim.particles
+    global hashes
+    hashes = {str(i-N_ACTIVE-start): ps[str(i-N_ACTIVE-start)].h
+              for i in range(N_ACTIVE + start-1, end+N_ACTIVE-1)}
+
+
     sim.n_active = N_ACTIVE
 
     print(f"Planets and and {n} particles have been added.",
